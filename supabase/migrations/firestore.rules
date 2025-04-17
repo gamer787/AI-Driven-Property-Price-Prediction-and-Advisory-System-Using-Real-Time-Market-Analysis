@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /predictions/{predictionId} {
+      // Allow users to read their own predictions
+      allow read: if request.auth != null && (
+        resource == null || // For non-existent documents
+        resource.data.userId == request.auth.uid
+      );
+
+      // Allow users to list all their predictions
+      allow list: if request.auth != null;
+
+      // Allow users to create predictions with their own userId
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+
+      // Allow users to update their own predictions
+      allow update: if request.auth != null &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid;
+
+      // Allow users to delete their own predictions
+      allow delete: if request.auth != null &&
+        resource.data.userId == request.auth.uid;
+    }
+  }
+}
